@@ -1,0 +1,139 @@
+<html>
+    <head>
+        <meta charset=utf-8 />
+        <title>Acuíferos de Mexico</title>
+        <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+        <!-- Fuente-->        
+        <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+
+
+        <!-- Load Leaflet from CDN -->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css"
+              integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+              crossorigin=""/>
+        <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"
+                integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg=="
+        crossorigin=""></script>
+        <script src="https://unpkg.com/esri-leaflet@2.2.4/dist/esri-leaflet.js"
+                integrity="sha512-tyPum7h2h36X52O2gz+Pe8z/3l+Y9S1yEUscbVs5r5aEY5dFmP1WWRY/WLLElnFHa+k1JBQZSCDGwEAnm2IxAQ=="
+        crossorigin=""></script>
+              
+        <!-- Estilos -->
+        <link rel="stylesheet" href="map.css">
+
+        <!-- Mapas -->
+        <script type="text/javascript" src="acuiferos_mex.js"></script>
+        <script type="text/javascript" src="cuencas.js"></script>
+        <script type="text/javascript" src="estados.js"></script>
+         <script type="text/javascript" src="indice250.js"></script>
+          <script type="text/javascript" src="indice50.js"></script>
+        
+        <link rel="stylesheet" href="https://unpkg.com/leaflet-sidebar-v2@3.2.0/css/leaflet-sidebar.min.css" />
+        <script src="https://unpkg.com/leaflet-sidebar-v2@3.2.0/js/leaflet-sidebar.min.js"></script>
+
+
+    </head>
+    <body> 
+        <div id="map"></div>
+        <div id="graticule-labels"></div>
+       
+        <!-- datos flotante -->
+        <div id="info-acuif" style="display: none; position: absolute; z-index: 100000;">
+            <button id="cerrar-info" style="float: right; margin: 5px; cursor: pointer;">✖</button>
+            <div id="contenido-info"></div>
+        </div>
+       
+        <div id="sidebar" class="leaflet-sidebar collapsed">
+
+            <!-- pestañas  -->
+            <div class="leaflet-sidebar-tabs">
+                <ul role="tablist">
+                <li>
+                    <a href="#home" role="tab">
+                    <img src="layer_azul.png" alt="Capas" style="width: 40px; height: 40px; vertical-align: middle;" />
+                    </a>
+                </li>
+                </ul>
+            </div>
+
+           <!-- Contenido del panel -->
+            <div class="leaflet-sidebar-content">
+            <div class="leaflet-sidebar-pane" id="home">
+
+            <!-- Capas -->
+            <h1>Mapas</h1>
+            <ul class="layer-toggles">
+            <li>
+                <label style="cursor: pointer;" for="toggle-acuif">
+                <input type="checkbox" id="toggle-acuif" style="margin-right: 5px;" checked disabled>
+                Acuíferos
+                </label>
+                <span id="toggle-icon" style="cursor: pointer; margin-left: 8px;">▼</span>
+            </li>
+            </ul>
+
+            <!-- Contenedor para el listado -->
+            <div id="acuif-container" style="display: none;">
+                <ul id="acuif-listado"></ul>
+            </div>
+             
+            <!-- Cuencas -->
+            <ul class="layer-toggles">
+                <li>
+                    <label style="cursor: pointer;" for="toggle-cuencas">
+                    <input type="checkbox" id="toggle-cuencas" style="margin-right: 5px;">
+                    Cuencas
+                    </label>
+                </li>
+            </ul>
+            <!-- Estados -->
+            <ul class="layer-toggles">
+                <li>
+                    <label style="cursor: pointer;" for="toggle-estados">
+                    <input type="checkbox" id="toggle-estados" style="margin-right: 5px;">
+                        Estados
+                    </label>
+                </li>
+            </ul>
+           
+            <!-- Indice50 -->
+            <ul class="layer-toggles">
+                <li>
+                    <label style="cursor: pointer;" for="toggle-indice50">
+                    <input type="checkbox" id="toggle-indice50" style="margin-right: 5px;">
+                        Indice 50
+                    </label>
+                </li>
+            </ul>
+             <!-- Indice250 -->
+            <ul class="layer-toggles">
+                <li>
+                    <label style="cursor: pointer;" for="toggle-indice250">
+                    <input type="checkbox" id="toggle-indice250" style="margin-right: 5px;">
+                        Indice 250
+                    </label>
+                </li>
+            </ul>
+            
+        </div>
+        </div>
+
+        </div>
+            <!-- Control de Zoom personalizado -->
+      
+        <div id="custom-zoom">
+            <button id="zoom-in" title="Acercar">+</button>
+            <button id="zoom-out" title="Alejar" >−</button>
+            <button id="zoombox-btn" title="Zoom por cuadro">
+                <img src="zoom.png" alt="Zoom por cuadro"></button>
+            <button id="identify-btn" title="Identificar acuífero"> 🛈</button>
+            <!-- Botón Limpiar Selección -->
+            <button id="clear-btn" title="Limpiar selección">✕</button>
+            <button id="zoom-reset" title="Zoom a todo el mapa">⛶</button>
+        </div>
+        
+
+
+        <script src="map.js"></script>
+    </body>
+</html>

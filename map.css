@@ -1,0 +1,342 @@
+/* 
+    Created on : 9/05/2019, 12:33:18 AM
+    Author     : auraramos
+*/
+
+#map{
+  position: relative;
+  height: 100%;
+  width: 100%;
+  z-index: 1; 
+}
+
+body { 
+    margin:0; 
+    padding:0; 
+}
+
+.leaflet-control-layers-toggle {
+  background-color: transparent !important;
+  background-image: url("layers.png") !important; /* Asegúrate del nombre correcto */
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 40px 40px;
+  border: none !important;
+  box-shadow: none !important;
+  width: 40px;
+  height: 40px;
+  display: block;
+}
+
+
+/*color azul del icono de layers*/
+.leaflet-control-layers-toggle:focus,
+.leaflet-control-layers-toggle:active {
+  background-color: #ccc !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Cuando el menú de capas está abierto */
+.leaflet-control-layers-expanded .leaflet-control-layers-toggle {
+  background-color: #cccccc !important; /* gris claro o el tono que desees */
+  background-image: url("layers.png") !important;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 40px 40px;
+  border: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+  outline: none !important;
+}
+
+
+
+/*para cambiar el color de los check*/
+input[type="checkbox"] {
+  accent-color: gray; /* Solo funciona en navegadores modernos */
+}
+
+
+/* A veces Leaflet pone fondo blanco desde el contenedor */
+.leaflet-control-layers {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+
+/* 🔒 Forzamos transparencia en TODO el sidebar */
+.leaflet-sidebar,
+.leaflet-sidebar-tabs,
+.leaflet-sidebar-content,
+.leaflet-sidebar-pane {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* 🧊 Fondo semitransparente elegante SOLO cuando está abierto */
+.leaflet-sidebar:not(.collapsed) .leaflet-sidebar-content {
+  background: rgba(255, 255, 255, 0.2) !important; /* Ajusta el color si quieres */
+  backdrop-filter: blur(4px); /* Opcional: efecto de desenfoque */
+  padding: 10px;
+  border-radius: 0 5px 5px 0;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+}
+
+
+/* Scrollbar moderna para navegadores Webkit (Chrome, Edge, Safari) */
+.leaflet-sidebar-content::-webkit-scrollbar {
+  width: 12px;
+}
+
+.leaflet-sidebar-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.leaflet-sidebar-content::-webkit-scrollbar-thumb {
+  background-color: black;
+  border-radius: 4px;
+}
+
+/* Firefox */
+.leaflet-sidebar-content {
+  scrollbar-width: thin;
+  scrollbar-color: black transparent;
+}
+
+/*para colocar el icono debjao de las capas*/
+
+/* Oculta el zoom original de Leaflet */
+.leaflet-control-zoom {
+  display: none;
+}
+
+/* Crea un nuevo contenedor para el zoom personalizado */
+#custom-zoom {
+  position: absolute;
+  top: 60px;
+  left: 12px;
+  z-index: 9999; /* aseguramos que esté encima de todo */
+  pointer-events: auto; /* importante para que reciba clics */
+  display: flex;
+  flex-direction: column;
+  background-color: transparent !important;
+  border: 1px solid #070707;
+  border-radius: 4px;
+  box-shadow: transparent !important;
+  width: 34px;
+}
+
+#custom-zoom button {
+  font-size: 28px; /* aumenta el tamaño del símbolo */
+  padding: 8px 12px; /* espacio dentro del botón */
+  background-color: transparent;
+  border: 1.5px solid #080808;
+  cursor: pointer;
+  line-height: 1;
+  width: 32px;
+  height: 32px;
+  padding: 4px;
+  width: 34px;
+}
+
+
+/* zoom a todo el mapa*/
+
+#custom-zoom button:hover {
+  background-color: #f0f0f0;
+}
+
+
+#zoom-reset {
+  width: 32px;
+  height: 32px;
+  font-size: 16px;
+  margin-top: 0px;
+  background-color:transparent !important;
+  border: 1.5px solid #080808;
+  border-radius: 0px;
+  cursor: pointer;
+  box-shadow: transparent !important;
+  background-color: #f0f0f0;
+}
+
+/* checks*/
+
+.layer-toggles {
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: 1em;
+}
+
+.layer-toggles li {
+  margin-bottom: 0.5em;
+}
+
+/* Fuentes*/
+body {
+  font-family: 'Quicksand', sans-serif;
+}
+
+
+.layer-toggles label {
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/*agrandar check*/
+
+.layer-toggles input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  transform: scale(1.2); /* escala el checkbox */
+}
+
+/*Flechita de ver listado*/
+#toggle-icon {
+  cursor: pointer;
+  font-weight: bold;
+  margin-left: 8px;
+  transition: color 0.3s;
+}
+
+#toggle-icon.inactive-flecha {
+  color: gray;
+  cursor: default;
+}
+
+
+/*Estilo estiquetas*/
+
+.etiqueta-acuif {
+  font-family: 'Quicksand', sans-serif;
+  font-size: 18px;
+  color: rgb(14, 13, 13);
+  background-color: none;
+  padding: 4px 6px;
+  border-radius: 6px;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;  /* No interfiere con clics del mapa */
+}
+
+/*Estilo de la caja de identificador*/
+#info-acuif {
+  position: absolute;
+  z-index: 100000 !important;
+  background: white;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  display: none;
+  max-width: 280px;
+  font-size: 13px;
+  pointer-events: auto;
+}
+
+#zoombox-btn {
+  background: none;
+  border: 1px solid black;
+  cursor: pointer;
+  width: 34px;
+  height: 36px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#zoombox-btn img {
+  width: 26px;
+  height: 26px;
+  margin-top: 1px;
+}
+
+#identify-btn {
+background: none; 
+border: 1px solid black;
+cursor: pointer;
+ width: 34px;
+ height: 36px;
+}
+
+
+#clear-btn{
+background: none;
+border: 1px solid black;
+cursor: pointer;
+width: 34px; 
+height: 36px;
+} 
+/*Quita los estilos por defecto de la lista (viñetas):*/
+ul.layer-toggles {
+  list-style-type: none;
+  padding-left: 0;
+  margin-left: 0;
+}
+
+
+/*Etiqueta Indice250*/
+.etiqueta-indice250 {
+  font-size: 18px;
+  font-weight: bold;
+  color: gray;
+  background: none;
+  border: none;
+  padding: 0;
+  box-shadow: none;
+  white-space: nowrap;
+}
+
+/*Etiqueta indice50*/
+.etiqueta-indice50 {
+  font-size: 16px;
+  font-weight: bold;
+  color: rgb(29, 25, 25);
+  padding: 0;
+  border-radius: 3px;
+}
+
+/*panel de layers*/
+
+#sidebar {
+  width: 330px !important;  /* Ajusta a lo que necesites */
+  max-width: 330px !important;
+}
+
+.sidebar-content {
+  padding: 10px;
+}
+/*etiquetas grados*/
+
+
+.graticule-label-control {
+  position: absolute;
+  pointer-events: none;
+  z-index: 9999;
+  font: 12px Arial;
+  background-color: rgba(255, 255, 255, 0.85);
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+.graticule-label-right {
+  right: 4px;
+  transform: translateY(-50%);
+}
+
+.graticule-label-bottom {
+  bottom: 4px;
+  transform: translateX(-50%);
+}
+
+#graticule-labels {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 9000;
+  pointer-events: none;
+}
