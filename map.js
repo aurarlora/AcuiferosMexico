@@ -1,3 +1,9 @@
+var boundsAcuiferos = [
+  [14.531865, -117.125824], // Suroeste (lat, lng)
+  [32.718721, -86.731454]   // Noreste (lat, lng)
+];
+
+
 var states = L.esri.featureLayer({
     url: "https://apl.esri.com/apl2/rest/services/Mexico/Mexico_traveller_c/MapServer/28",
     style: function (feature) {
@@ -8,6 +14,9 @@ var states = L.esri.featureLayer({
 var map = L.map('map', {
   layers: [L.esri.basemapLayer("Topographic"), states]
 });
+
+map.fitBounds(boundsAcuiferos);
+
 
 var baseLayers = {
     "Oceanos": L.esri.basemapLayer("Oceans"),
@@ -69,6 +78,8 @@ document.getElementById('zoom-reset').addEventListener('click', function () {
   map.fitBounds(acuiferosLayer.getBounds());
 });
 
+
+
 // CONSTANTES
 const listadoAcuif = document.getElementById('acuif-listado');
 const checkboxAcuif = document.getElementById('toggle-acuif');
@@ -127,6 +138,17 @@ var indice250Style = {
   fillColor: '#fdcbd2ff',     
   fillOpacity: 0.1          
 };
+
+//agregar titulo al visor
+const etiquetaInicio = L.marker([24, -94], {
+  icon: L.divIcon({
+    className: 'etiqueta-inicial',
+    html: '<div>División de los sistemas\n acuíferos de México</div>',
+    iconSize: [160, 20],
+    iconAnchor: [80, 10]
+  })
+}).addTo(map);
+
 
 // Función toggle general
 function toggleLayer(checkbox, capaLeaflet, contenedorExtra = null) {
@@ -241,6 +263,8 @@ onEachFeature: function (feature, layer) {
     }
 });
 
+
+
 var acuiferosLayer = L.geoJson(acuiferos, {
     style: acuiferosStyle,
     onEachFeature: function (feature, layer) {
@@ -315,17 +339,7 @@ function mostrarInfoCuenca(feature, layer) {
 
 
 // Activar contenedor y estilos desde el inicio
-map.addLayer(acuiferosLayer);  // debe estar fuera también
-map.fitBounds(acuiferosLayer.getBounds());
-map.fitBounds(cuencasLayer.getBounds());
-map.fitBounds(estadosLayer.getBounds());
-map.fitBounds(indice250Layer.getBounds());
-map.fitBounds(indice50Layer.getBounds());
-
-setTimeout(() => {
-  console.log("Bounds cuencas:", cuencasLayer.getBounds());
-  map.fitBounds(cuencasLayer.getBounds());
-}, 1000);
+map.addLayer(acuiferosLayer);  
 
 contenedorAcuif.style.display = 'block';
 listadoAcuif.style.display = 'none'; // lista retraída
@@ -361,9 +375,14 @@ map.on('zoomend', () => {
 
 // Añadir la capa al mapa
 acuiferosLayer.addTo(map);
+
 acuiferosLayer.once('layeradd', function () {
   map.fitBounds(acuiferosLayer.getBounds());
+  updateGraticule();
 });
+
+
+
 
 
 // Agrega el evento para cerrar
@@ -646,8 +665,8 @@ function updateGraticule() {
   createGraticuleLabels(map, interval);
 }
 
+// Esperar a que los acuíferos estén completamente añadidos al mapa
+
 map.on('moveend zoomend resize', updateGraticule);
-updateGraticule(); // inicial
 
-
-
+console.log(acuiferosLayer.getBounds().toBBoxString());

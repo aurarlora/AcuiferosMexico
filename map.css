@@ -283,7 +283,7 @@ ul.layer-toggles {
 
 /*Etiqueta Indice250*/
 .etiqueta-indice250 {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: bold;
   color: gray;
   background: none;
@@ -291,15 +291,20 @@ ul.layer-toggles {
   padding: 0;
   box-shadow: none;
   white-space: nowrap;
+  text-align: center;
+  width: 100px; /* o ajusta según el caso */
 }
+
 
 /*Etiqueta indice50*/
 .etiqueta-indice50 {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: bold;
   color: rgb(29, 25, 25);
   padding: 0;
-  border-radius: 3px;
+  border-radius: none;
+  text-align: left;
+  width: 50px; /* o ajusta según el caso */
 }
 
 /*panel de layers*/
@@ -340,3 +345,17 @@ ul.layer-toggles {
   z-index: 9000;
   pointer-events: none;
 }
+
+.etiqueta-inicial {
+  font-family: 'Dancing Script', cursive;
+  font-size: 26px;
+  font-weight: 600;
+  color: #003366;
+  background:none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  pointer-events: none;
+  text-shadow: 0 1px 5px #fff;
+  transition: opacity 0.6s ease;
+}
+
