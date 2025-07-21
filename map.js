@@ -87,6 +87,7 @@ const checkboxCuencas = document.getElementById('toggle-cuencas');
 const checkboxEstados = document.getElementById('toggle-estados');
 const checkboxIndice250 = document.getElementById('toggle-indice250');
 const checkboxIndice50 = document.getElementById('toggle-indice50');
+const checkboxGrace = document.getElementById('toggle-grace');
 const contenedorAcuif = document.getElementById('acuif-container');
 const icono = document.getElementById('toggle-icon');
 const info = document.getElementById('info-acuif');
@@ -97,6 +98,12 @@ let etiquetasLayer = L.layerGroup().addTo(map);
 let acuifSeleccionado = null;
 let etiquetasIndice250 = L.layerGroup().addTo(map);
 let etiquetasIndice50 = L.layerGroup().addTo(map);
+let drawControl, drawnItems, selectedCellsLayer; 
+let cornerMarkers = [];
+
+//eventos de selección 
+drawnItems = new L.FeatureGroup().addTo(map);
+selectedCellsLayer = new L.FeatureGroup().addTo(map);
 
 
 // Estilos
@@ -139,13 +146,22 @@ var indice250Style = {
   fillOpacity: 0.1          
 };
 
+var graceStyle = {
+  color: '#16bef1ff',            
+  weight: 3,
+  dashArray: '4,2',         
+  fillColor: 'none',     
+  fillOpacity: 0.1          
+};
+
+
 //agregar titulo al visor
-const etiquetaInicio = L.marker([24, -94], {
+const etiquetaInicio = L.marker([32.5, -105], {
   icon: L.divIcon({
     className: 'etiqueta-inicial',
-    html: '<div>División de los sistemas\n acuíferos de México</div>',
-    iconSize: [160, 20],
-    iconAnchor: [80, 10]
+    html: '<div>División de los sistemas acuíferos de México</div>',
+    iconSize: [420, 20],
+    iconAnchor: [160, 10]
   })
 }).addTo(map);
 
@@ -212,10 +228,15 @@ function mostrarInfo(feature, layer) {
 }
 
 console.log("Cuencas:", typeof cuencas, cuencas);
-console.log("Estados:", typeof estados, estados);
+console.log("GRACE:", typeof rejilla025, estados);
 
 
 // VARIABLES***
+var graceLayer = L.geoJson(graceGrid, {
+style: graceStyle
+});
+
+
 var cuencasLayer = L.geoJson(cuencas, {
     style: cuencasStyle,
     onEachFeature: function (feature, layer) {
@@ -338,6 +359,62 @@ function mostrarInfoCuenca(feature, layer) {
 }
 
 
+//FUNCIONES DE RETICULA
+
+function createGraticuleLabels(map, interval) {
+  const bounds = map.getBounds();
+  const south = Math.floor(bounds.getSouth() / interval) * interval;
+  const north = Math.ceil(bounds.getNorth() / interval) * interval;
+  const west = Math.floor(bounds.getWest() / interval) * interval;
+  const east = Math.ceil(bounds.getEast() / interval) * interval;
+
+  // eliminar etiquetas anteriores
+  const container = map.getContainer();
+  const oldLabels = container.querySelectorAll('.graticule-label-control');
+  oldLabels.forEach(label => label.remove());
+
+  const labelContainer = document.getElementById('graticule-labels');
+  labelContainer.innerHTML = ''; // limpia anteriores
+
+
+  // etiquetas de latitud (derecha)
+for (let lat = south; lat <= north; lat += interval) {
+  const point = map.latLngToContainerPoint([lat, bounds.getEast()]);
+  const label = document.createElement('div');
+  label.className = 'graticule-label-control graticule-label-right';
+  label.style.position = 'absolute';
+  label.style.top = `${point.y}px`;
+  label.style.right = '4px';
+  label.innerHTML = `${Math.abs(lat)}°${lat >= 0 ? 'N' : 'S'}`;
+  labelContainer.appendChild(label);
+}
+
+// etiquetas de longitud (abajo)
+for (let lng = west; lng <= east; lng += interval) {
+  const point = map.latLngToContainerPoint([bounds.getSouth(), lng]);
+  const label = document.createElement('div');
+  label.className = 'graticule-label-control graticule-label-bottom';
+  label.style.position = 'absolute';
+  label.style.left = `${point.x}px`;
+  label.style.bottom = '4px';
+  label.innerHTML = `${Math.abs(lng)}°${lng >= 0 ? 'E' : 'W'}`;
+  labelContainer.appendChild(label);
+}
+}
+
+function updateGraticule() {
+  const zoom = map.getZoom();
+  let interval = 5;
+  if (zoom >= 7) interval = 2;
+  if (zoom >= 9) interval = 1;
+  if (zoom >= 11) interval = 0.5;
+  if (zoom >= 13) interval = 0.2;
+
+  drawGraticule(interval);
+  createGraticuleLabels(map, interval);
+}
+
+
 // Activar contenedor y estilos desde el inicio
 map.addLayer(acuiferosLayer);  
 
@@ -354,6 +431,10 @@ map.on('zoomend', () => {
   etiquetasIndice250.clearLayers();  // ind250
   etiquetasIndice50.clearLayers();  // ind50
   
+  //GRACE
+  document.getElementById('toggle-grace').addEventListener('change', updateGraceLayer);
+  // Llamada inicial
+  updateGraceLayer();
 
   if (map.getZoom() >= 9) {
     acuiferosLayer.eachLayer(l => {
@@ -371,6 +452,7 @@ map.on('zoomend', () => {
       if (l._etiquetaIndice50) etiquetasIndice50.addLayer(l._etiquetaIndice50);
     });
     }
+    
 });
 
 // Añadir la capa al mapa
@@ -485,6 +567,8 @@ map.on('click', function (e) {
 
 const clearBtn = document.getElementById('clear-btn');
 
+
+
 clearBtn.addEventListener('click', () => {
   // Quitar resaltado
   if (acuifSeleccionado) {
@@ -498,10 +582,20 @@ clearBtn.addEventListener('click', () => {
     info.style.display = 'none';
   }
 
-  // (Opcional) Desactivar la herramienta de identificar
+  // Desactivar la herramienta de identificar
   identificando = false;
   identifyBtn.style.backgroundColor = 'transparent';
   map.getContainer().style.cursor = '';
+
+  // 🧽 Limpiar selección GRACE
+  if (drawnItems) drawnItems.clearLayers();
+  if (selectedCellsLayer) selectedCellsLayer.clearLayers();
+  
+  if (cornerMarkers && cornerMarkers.length > 0) {
+    cornerMarkers.forEach(m => map.removeLayer(m));
+    cornerMarkers = [];
+  }
+
 });
 
 // 🔹 Mostrar/Ocultar capa de CUENCAS
@@ -612,61 +706,127 @@ function drawGraticule(intervalDegrees) {
   }
 }
 
-function createGraticuleLabels(map, interval) {
-  const bounds = map.getBounds();
-  const south = Math.floor(bounds.getSouth() / interval) * interval;
-  const north = Math.ceil(bounds.getNorth() / interval) * interval;
-  const west = Math.floor(bounds.getWest() / interval) * interval;
-  const east = Math.ceil(bounds.getEast() / interval) * interval;
 
-  // eliminar etiquetas anteriores
-  const container = map.getContainer();
-  const oldLabels = container.querySelectorAll('.graticule-label-control');
-  oldLabels.forEach(label => label.remove());
-
-  const labelContainer = document.getElementById('graticule-labels');
-  labelContainer.innerHTML = ''; // limpia anteriores
-
-
-  // etiquetas de latitud (derecha)
-for (let lat = south; lat <= north; lat += interval) {
-  const point = map.latLngToContainerPoint([lat, bounds.getEast()]);
-  const label = document.createElement('div');
-  label.className = 'graticule-label-control graticule-label-right';
-  label.style.position = 'absolute';
-  label.style.top = `${point.y}px`;
-  label.style.right = '4px';
-  label.innerHTML = `${Math.abs(lat)}°${lat >= 0 ? 'N' : 'S'}`;
-  labelContainer.appendChild(label);
-}
-
-// etiquetas de longitud (abajo)
-for (let lng = west; lng <= east; lng += interval) {
-  const point = map.latLngToContainerPoint([bounds.getSouth(), lng]);
-  const label = document.createElement('div');
-  label.className = 'graticule-label-control graticule-label-bottom';
-  label.style.position = 'absolute';
-  label.style.left = `${point.x}px`;
-  label.style.bottom = '4px';
-  label.innerHTML = `${Math.abs(lng)}°${lng >= 0 ? 'E' : 'W'}`;
-  labelContainer.appendChild(label);
-}
-}
-
-function updateGraticule() {
-  const zoom = map.getZoom();
-  let interval = 5;
-  if (zoom >= 7) interval = 2;
-  if (zoom >= 9) interval = 1;
-  if (zoom >= 11) interval = 0.5;
-  if (zoom >= 13) interval = 0.2;
-
-  drawGraticule(interval);
-  createGraticuleLabels(map, interval);
-}
-
+console.log("GRACE:", graceLayer);
 // Esperar a que los acuíferos estén completamente añadidos al mapa
 
 map.on('moveend zoomend resize', updateGraticule);
 
-console.log(acuiferosLayer.getBounds().toBBoxString());
+
+
+// Cuadricula de GRACE
+
+function updateGraceLayer() {
+  const zoom = map.getZoom();
+    // Habilita o deshabilita el checkbox según zoom
+  checkboxGrace.disabled = zoom < 8;
+
+  // Control de visibilidad de la capa
+  if (zoom >= 8 && checkboxGrace.checked) {
+    if (!map.hasLayer(graceLayer)) {
+      map.addLayer(graceLayer);
+    }
+  } else {
+    if (map.hasLayer(graceLayer)) {
+      map.removeLayer(graceLayer);
+    }
+  }
+}
+
+// Evento por si el usuario activa o desactiva el check
+document.getElementById('toggle-grace').addEventListener('change', updateGraceLayer);
+map.on('zoomend', updateGraceLayer);
+
+// Activar herramienta solo si GRACE está activo
+function toggleSelectButton() {
+  const btn = document.getElementById('select-grace');
+  const check = document.getElementById('toggle-grace');
+}
+
+document.getElementById('toggle-grace').addEventListener('change', toggleSelectButton);
+map.on('zoomend', toggleSelectButton);
+
+//  Activar herramienta al dar clic en el botón
+
+document.getElementById('select-grace').addEventListener('click', () => {
+  // Inicia modo dibujo de rectángulo
+  new L.Draw.Rectangle(map, {
+    shapeOptions: {
+      color: 'yellow',
+      weight: 1,
+      fillOpacity: 0.3
+    }
+  }).enable();
+});
+
+
+// Manejar selección y resaltar celdas GRACE
+map.on(L.Draw.Event.CREATED, function (event) {
+  drawnItems.clearLayers();
+  selectedCellsLayer.clearLayers();
+  cornerMarkers.forEach(m => map.removeLayer(m));
+  cornerMarkers = [];
+
+  const rect = event.layer;
+  //drawnItems.addLayer(rect);
+
+  const bounds = rect.getBounds();
+
+  // Buscar intersección con GRACE
+  graceLayer.eachLayer(layer => {
+    if (bounds.intersects(layer.getBounds())) {
+      selectedCellsLayer.addLayer(L.polygon(layer.getLatLngs(), {
+        color: '#ecfd04ff',
+        fillColor: '#0c0c0cff',
+        weight: 1.5,
+        fillOpacity: 0.5
+      }));
+    }
+  });
+
+  // Esquinas con etiquetas
+  const offset = 0.2; // grados para alejar las etiquetas (ajústalo si es necesario)
+  const corners = [
+    { latlng: bounds.getNorthWest(), dx: -offset, dy: offset },   // arriba izquierda
+    { latlng: bounds.getNorthEast(), dx: offset, dy: offset },    // arriba derecha
+    { latlng: bounds.getSouthWest(), dx: -offset, dy: -offset },  // abajo izquierda
+    { latlng: bounds.getSouthEast(), dx: offset, dy: -offset }    // abajo derecha
+  ];
+
+  corners.forEach(c => {
+    const newLatLng = L.latLng(c.latlng.lat + c.dy, c.latlng.lng + c.dx);
+    const label = formatDMS(c.latlng.lat, c.latlng.lng); // usa la lat/lng original
+    const marker = L.marker(newLatLng, {
+      icon: L.divIcon({
+        className: 'corner-label',
+        html: `<div>${label}</div>`,
+        iconSize: [120, 18]
+      })
+    });
+    cornerMarkers.push(marker);
+    map.addLayer(marker);
+  });
+});
+
+
+// Función para convertir a grados/minutos/segundos
+
+function formatDMS(lat, lng) {
+  function toDMS(deg) {
+    const d = Math.floor(Math.abs(deg));
+    const m = Math.floor((Math.abs(deg) - d) * 60);
+    const s = Math.round((((Math.abs(deg) - d) * 60) - m) * 60);
+    return `${d}°${m}′${s}″`;
+  }
+
+  const latLabel = `${toDMS(lat)}${lat >= 0 ? 'N' : 'S'}`;
+  const lngLabel = `${toDMS(lng)}${lng >= 0 ? 'E' : 'W'}`;
+  return `${latLabel}, ${lngLabel}`;
+}
+
+
+// Fit y cuadrícula inicial cuando el mapa está listo
+map.whenReady(() => {
+  map.fitBounds(boundsAcuiferos);
+  updateGraticule(); // ¡Aquí ya están declaradas todas las funciones!
+});

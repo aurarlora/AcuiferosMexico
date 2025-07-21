@@ -17,7 +17,12 @@
         <script src="https://unpkg.com/esri-leaflet@2.2.4/dist/esri-leaflet.js"
                 integrity="sha512-tyPum7h2h36X52O2gz+Pe8z/3l+Y9S1yEUscbVs5r5aEY5dFmP1WWRY/WLLElnFHa+k1JBQZSCDGwEAnm2IxAQ=="
         crossorigin=""></script>
-              
+        
+        <!-- Leaflet Draw CSS -->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet-draw/dist/leaflet.draw.css" />
+        <!-- Leaflet Draw JS -->
+        <script src="https://unpkg.com/leaflet-draw/dist/leaflet.draw.js"></script>
+        
         <!-- Estilos -->
         <link rel="stylesheet" href="map.css">
        <link href="https://fonts.googleapis.com/css2?family=Dancing+Script&display=swap" rel="stylesheet">
@@ -26,8 +31,9 @@
         <script type="text/javascript" src="acuiferos_mex.js"></script>
         <script type="text/javascript" src="cuencas.js"></script>
         <script type="text/javascript" src="estados.js"></script>
-         <script type="text/javascript" src="indice250.js"></script>
-          <script type="text/javascript" src="indice50.js"></script>
+        <script type="text/javascript" src="indice250.js"></script>
+        <script type="text/javascript" src="indice50.js"></script>
+        <script type="text/javascript" src="rejilla025.js"></script>
         
         <link rel="stylesheet" href="https://unpkg.com/leaflet-sidebar-v2@3.2.0/css/leaflet-sidebar.min.css" />
         <script src="https://unpkg.com/leaflet-sidebar-v2@3.2.0/js/leaflet-sidebar.min.js"></script>
@@ -115,6 +121,15 @@
                     </label>
                 </li>
             </ul>
+            <!-- grace -->
+            <ul class="layer-toggles">
+                <li>
+                    <label style="cursor: pointer;"  for="toggle-grace">
+                    <input type="checkbox" id="toggle-grace" style="margin-right: 5px;">
+                        Cuadricula 0.25°
+                    </label>
+                </li>
+            </ul>
             
         </div>
         </div>
@@ -131,9 +146,10 @@
             <!-- Botón Limpiar Selección -->
             <button id="clear-btn" title="Limpiar selección">✕</button>
             <button id="zoom-reset" title="Zoom a todo el mapa">⛶</button>
+            <button id="select-grace" title="Seleccionar AOL" >
+                <img src="squad.png" alt="Seleccionar área de estudio"></button> </button>
         </div>
         
-
 
         <script src="map.js"></script>
     </body>
